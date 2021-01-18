@@ -18,7 +18,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    recipe = db.relationship('Recipe', backref='title', lazy='dynamic')
+    recipe = db.relationship('Recipe', backref='recipes', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -43,7 +43,7 @@ class Recipe(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     recipe_ingredient = db.relationship('Ingredient', secondary=recipe_ingredient,
-                                        backref=db.backref('measure', lazy='dynamic'), cascade="all, delete-orphan")
+                                        backref=db.backref('measure', lazy='dynamic'), cascade="all")
 
     def __repr__(self):
         return f'<Recipe {self.body}>'
@@ -54,7 +54,7 @@ class Measure(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(120))
     recipe_ingredient = db.relationship('Recipe', secondary=recipe_ingredient,
-                                        backref=db.backref('recipes', lazy='dynamic'), cascade="all, delete-orphan")
+                                        backref=db.backref('recipes_names', lazy='dynamic'), cascade="all")
 
 
 class MeasureQty(db.Model):
@@ -62,7 +62,7 @@ class MeasureQty(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Integer)
     recipe_ingredient = db.relationship('Recipe', secondary=recipe_ingredient,
-                                        backref=db.backref('recipes', lazy='dynamic'), cascade="all, delete-orphan")
+                                        backref=db.backref('recipes_1', lazy='dynamic'), cascade="all")
 
 
 class Ingredient(db.Model):
@@ -71,4 +71,4 @@ class Ingredient(db.Model):
     name = db.Column(db.String(120))
     calories = db.Column(db.Integer)
     recipe_ingredient = db.relationship('Recipe', secondary=recipe_ingredient,
-                                        backref=db.backref('recipes', lazy='dynamic'), cascade="all, delete-orphan")
+                                        backref=db.backref('recipes_2', lazy='dynamic'), cascade="all")
