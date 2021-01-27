@@ -3,12 +3,11 @@ from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-
 recipe_ingredient = db.Table('recipe_ingredient',
-                    db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id')),
-                    db.Column('measure_id', db.Integer, db.ForeignKey('measure.id')),
-                    db.Column('measure_qty_id', db.Integer, db.ForeignKey('measure_qty.id')),
-                    db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredient.id')))
+                             db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id')),
+                             db.Column('measure_id', db.Integer, db.ForeignKey('measure.id')),
+                             db.Column('measure_qty_id', db.Integer, db.ForeignKey('measure_qty.id')),
+                             db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredient.id')))
 
 
 class User(UserMixin, db.Model):
@@ -33,6 +32,9 @@ class User(UserMixin, db.Model):
     def load_user(id):
         return User.query.get(int(id))
 
+    def show_recipes(self):
+        return Recipe.query.filter_by(user_id=self.id)
+
 
 class Recipe(db.Model):
     __tablename__ = 'recipe'
@@ -42,11 +44,24 @@ class Recipe(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    recipe_ingredient = db.relationship('Ingredient', secondary=recipe_ingredient,
-                                        backref=db.backref('measure', lazy='dynamic'), cascade="all")
+    recipes = db.relationship('Ingredient', secondary=recipe_ingredient,
+                              primaryjoin=(recipe_ingredient.c.recipe_id == id),
+                              secondaryjoin=(recipe_ingredient.c.ingredient_id == id),
+                              backref=db.backref('ingredient', lazy='dynamic'), cascade="all")
 
     def __repr__(self):
-        return f'<Recipe {self.body}>'
+        return f'<Recipe {self.title}>'
+
+    def exist(self, recipe):
+        return self.recipes.filter(recipe_ingredient.c.recipe_id == recipe.id).count() > 0
+
+    def add_recipe(self, recipe):
+        if not self.exist(recipe):
+            self.recipes.append(recipe)
+
+    def remove_recipe(self, recipe):
+        if not self.exist(recipe):
+            self.recipes.remove(recipe)
 
 
 class Measure(db.Model):
