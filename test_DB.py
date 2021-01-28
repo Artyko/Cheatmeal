@@ -26,11 +26,21 @@ class TestBD:
         db.session.add(user_2)
         db.session.commit()
         assert user_1.recipe.all() == []
+        assert user_2.recipe.all() == []
 
-        recipe_1 = Recipe(title='Strawberry pie', user_id=1)
-        recipe_2 = Recipe(title='Cheese soup', user_id=2)
-        db.session.add(recipe_1)
-        db.session.add(recipe_2)
+    def test_add_and_remove_recipe_to_user(self):
+        user_1 = User(username='john', email='john@example.com')
+        db.session.add(user_1)
         db.session.commit()
+        recipe_1 = Recipe(title='Strawberry pie')
+        user_1.add_recipe(recipe_1)
         assert user_1.recipe.count() == 1
-        assert user_2.recipe.count() == 1
+
+        user_1.remove_recipe(recipe_1)
+        db.session.commit()
+        assert user_1.recipe.count() == 0
+
+
+
+
+

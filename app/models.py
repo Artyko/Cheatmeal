@@ -33,7 +33,18 @@ class User(UserMixin, db.Model):
         return User.query.get(int(id))
 
     def show_recipes(self):
-        return Recipe.query.filter_by(user_id=self.id)
+        return self.recipe.query.filter_by(user_id=self.id)
+
+    def recipe_exist(self, recipe):
+        return self.recipe.filter(recipe_ingredient.c.recipe_id == recipe.id).count() > 0
+
+    def add_recipe(self, recipe):
+        if not self.recipe_exist(recipe):
+            self.recipe.append(recipe)
+
+    def remove_recipe(self, recipe):
+        if not self.recipe_exist(recipe):
+            self.recipe.remove(recipe)
 
 
 class Recipe(db.Model):
@@ -51,17 +62,6 @@ class Recipe(db.Model):
 
     def __repr__(self):
         return f'<Recipe {self.title}>'
-
-    def exist(self, recipe):
-        return self.recipes.filter(recipe_ingredient.c.recipe_id == recipe.id).count() > 0
-
-    def add_recipe(self, recipe):
-        if not self.exist(recipe):
-            self.recipes.append(recipe)
-
-    def remove_recipe(self, recipe):
-        if not self.exist(recipe):
-            self.recipes.remove(recipe)
 
 
 class Measure(db.Model):
