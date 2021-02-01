@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
         return User.query.get(int(id))
 
     def show_recipes(self):
-        return self.recipe.query.filter_by(user_id=self.id)
+        return Recipe.query.filter_by(user_id=self.id)
 
     def recipe_exist(self, recipe):
         return self.recipe.filter(recipe_ingredient.c.recipe_id == recipe.id).count() > 0

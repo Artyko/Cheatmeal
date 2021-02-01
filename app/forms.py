@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
-    TextAreaField
-from wtforms.validators import ValidationError, DataRequired, EqualTo, \
-    Length
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms.validators import ValidationError, DataRequired, EqualTo, Length
 from app.models import User
 
 
@@ -45,3 +43,10 @@ class EditProfileForm(FlaskForm):
             user = User.query.filter_by(username=self.username.date)
             if user is not None:
                 raise ValidationError('Please use a different username')
+
+
+class RecipeForm(FlaskForm):
+    title = StringField('Recipe name', validators=[DataRequired()])
+    ingredients = TextAreaField('Ingredient name')
+    description = TextAreaField('Describe your recipe')
+    submit = SubmitField('Submit')

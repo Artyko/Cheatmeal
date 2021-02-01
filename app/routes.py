@@ -3,8 +3,8 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
-from app.models import User
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, RecipeForm
+from app.models import User, Recipe
 
 
 @app.before_request
@@ -14,17 +14,22 @@ def before_request():
         db.session.commit()
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    recipes = [
-        {
-            'title': 'Strawberry pie',
-            'description': 'Beautiful pie!'
-        }
-    ]
-    return render_template('index.html', title='Home', recipes=recipes)
+    form = RecipeForm()
+    if form.validate_on_submit():
+        recipe = Recipe(title=form.title.data,
+                        description=form.description.data,
+                        user_id=current_user.id)
+        db.session.add(recipe)
+        db.session.commit()
+        flash('Your recipe is now live!')
+        return redirect(url_for('index'))
+    recipes = current_user.show_recipes().all()
+    return render_template('index.html', title='Home', form=form,
+                           recipes=recipes)
 
 
 @app.route('/login', methods=['GET', 'POST'])

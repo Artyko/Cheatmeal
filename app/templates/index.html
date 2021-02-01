@@ -2,6 +2,21 @@
 
 {% block content %}
     <h1>Hi, {{ current_user.username }}!</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title }}<br>
+            {{ form.ingredients.label }}<br>
+            {{ form.ingredients(cols=32, rows=4) }}<br>
+            {{ form.description.label }}<br>
+            {{ form.description(cols=32, rows=4) }}<br>
+            {% for error in form.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
     {% for recipe in recipes %}
     <div><h2>{{ recipe.title }}</h2>
         <p>{{ recipe.description }}</p>
