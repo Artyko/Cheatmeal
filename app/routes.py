@@ -27,9 +27,16 @@ def index():
         db.session.commit()
         flash('Your recipe is now live!')
         return redirect(url_for('index'))
-    recipes = current_user.show_recipes().all()
-    return render_template('index.html', title='Home', form=form,
-                           recipes=recipes)
+    page = request.args.get('page', 1, type=int)
+    recipes = current_user.show_recipes().paginate(
+        page, app.config['RECIPES_PER_PAGE'], False)
+    next_url = url_for('index', page=recipes.next_num) \
+        if recipes.has_next else None
+    prev_url = url_for('index', page=recipes.prev_num) \
+        if recipes.has_prev else None
+    return render_template('index.html', title='Home',
+                           form=form, recipes=recipes.items,
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -75,11 +82,15 @@ def register():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    recipes = [
-        {'title': 'Test recipe #1', 'description': 'Description recipe #1'},
-        {'title': 'Test recipe #2', 'description': 'Description recipe #2'}
-    ]
-    return render_template('user.html', user=user, recipes=recipes)
+    page = request.args.get('page', 1, type=int)
+    recipes = user.recipe.order_by(Recipe.timestamp.desc()).paginate(
+        page, app.config['RECIPES_PER_PAGE'], False)
+    next_url = url_for('index', page=recipes.next_num) \
+        if recipes.has_next else None
+    prev_url = url_for('index', page=recipes.prev_num) \
+        if recipes.has_prev else None
+    return render_template('user.html', user=user, recipes=recipes.items,
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -100,5 +111,12 @@ def edit_profile():
 @app.route('/explore')
 @login_required
 def explore():
-    recipes = Recipe.query.order_by(Recipe.timestamp.desc()).all()
-    return render_template('index.html', title='Explore', recipes=recipes)
+    page = request.args.get('page', 1, type=int)
+    recipes = Recipe.query.order_by(Recipe.timestamp.desc()).paginate(
+        page, app.config['RECIPES_PER_PAGE'], False)
+    next_url = url_for('index', page=recipes.next_num) \
+        if recipes.has_next else None
+    prev_url = url_for('index', page=recipes.prev_num) \
+        if recipes.has_prev else None
+    return render_template('index.html', title='Explore', recipes=recipes.items,
+                           next_url=next_url, prev_url=prev_url)
