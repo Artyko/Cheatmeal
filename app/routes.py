@@ -75,11 +75,11 @@ def register():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    posts = [
-        {'author': user, 'body': 'Test post #1'},
-        {'author': user, 'body': 'Test post #2'}
+    recipes = [
+        {'title': 'Test recipe #1', 'description': 'Description recipe #1'},
+        {'title': 'Test recipe #2', 'description': 'Description recipe #2'}
     ]
-    return render_template('user.html', user=user, posts=posts)
+    return render_template('user.html', user=user, recipes=recipes)
 
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -95,3 +95,10 @@ def edit_profile():
         form.username.data = current_user.username
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
+
+
+@app.route('/explore')
+@login_required
+def explore():
+    recipes = Recipe.query.order_by(Recipe.timestamp.desc()).all()
+    return render_template('index.html', title='Explore', recipes=recipes)
