@@ -1,5 +1,6 @@
 from app import app, db
 from app.models import User, Recipe
+from app import cli
 
 
 @app.shell_context_processor

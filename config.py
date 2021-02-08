@@ -9,3 +9,4 @@ class Config(object):
                               'sqlite:///' + os.path.join(BASEDIR, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     RECIPES_PER_PAGE = 10
+    LANGUAGES = ['en', 'ru']
